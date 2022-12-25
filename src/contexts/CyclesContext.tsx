@@ -18,7 +18,7 @@ interface CreateCycleData {
   minutesAmount: number
 }
 
-interface CycleContextType {
+interface CyclesContextType {
   cycles: Cycle[]
   activeCycle: Cycle | undefined
   activeCycleId: string | null
@@ -29,13 +29,15 @@ interface CycleContextType {
   interruptCurrentCycle: () => void
 }
 
-export const CyclesContext = createContext({} as CycleContextType)
+export const CyclesContext = createContext({} as CyclesContextType)
 
-interface CycleContextProviderProps {
+interface CyclesContextProviderProps {
   children: ReactNode
 }
 
-export function CyclesContextProvider({ children }: CycleContextProviderProps) {
+export function CyclesContextProvider({
+  children,
+}: CyclesContextProviderProps) {
   const [cyclesState, dispatch] = useReducer(
     cyclesReducer,
     {
@@ -43,11 +45,19 @@ export function CyclesContextProvider({ children }: CycleContextProviderProps) {
       activeCycleId: null,
     },
     () => {
-      const storagedStateAsJSON = localStorage.getItem(
+      const storedStateAsJSON = localStorage.getItem(
         '@ignite-timer:cycles-state-1.0.0',
       )
-      if (storagedStateAsJSON) {
-        return JSON.parse(storagedStateAsJSON)
+
+      console.log(storedStateAsJSON)
+
+      if (storedStateAsJSON) {
+        return JSON.parse(storedStateAsJSON)
+      } else {
+        return {
+          cycles: [],
+          activeCycleId: null,
+        }
       }
     },
   )
@@ -59,6 +69,7 @@ export function CyclesContextProvider({ children }: CycleContextProviderProps) {
     if (activeCycle) {
       return differenceInSeconds(new Date(), new Date(activeCycle.startDate))
     }
+
     return 0
   })
 
